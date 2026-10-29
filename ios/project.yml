@@ -88,10 +88,13 @@ targets:
         CURRENT_PROJECT_VERSION: 1
         ASSETCATALOG_COMPILER_APPICON_NAME: SpektraLab
         SUPPORTS_MACCATALYST: NO
+    dependencies:
+      # The engine's overscan node convolves with vImage; the Mac target
+      # links Accelerate the same way.
+      - sdk: Accelerate.framework
     info:
       path: app/Info.plist
-      properties:
-        CFBundleDisplayName: SpektraLab
+      properties:        CFBundleDisplayName: SpektraLab
         CFBundleShortVersionString: "0.1.0"
         CFBundleVersion: "1"
         UILaunchScreen: {}
