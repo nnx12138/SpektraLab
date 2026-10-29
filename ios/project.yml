@@ -65,12 +65,11 @@ targets:
       - path: ../engine/src/core
       - path: ../engine/src/gpu
       - path: ../engine/src/pipeline
-      # — resources: the app's own folders as-is, plus the engine data that
-      #   ios/build.sh stages (constants, profiles, print LUTs, and the
-      #   **iOS-built** metallib — never the macOS one) —
-      - path: ../modern_UI/Spektrafilm/Spektrafilm/Resources
-        type: folder
-        buildPhase: resources
+      # — resources: ONE folder reference. build.sh merges the app's own
+      #   resources (DI, FilmCovers, Licenses, StockCatalog.json) with the
+      #   staged engine data (constants, profiles, print LUTs and the
+      #   **iOS-built** metallib — never the macOS one) into ios/Resources;
+      #   two folder references would both copy as "Resources" and collide. —
       - path: Resources
         type: folder
         buildPhase: resources

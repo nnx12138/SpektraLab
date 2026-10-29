@@ -54,8 +54,14 @@ if [[ -n "$sdk" ]]; then
   echo "    metallib -> $out/spektrafilm.metallib"
 fi
 
-# --- 2. engine data into the iOS resource folder ---------------------------
-echo "==> staging engine resources"
+# --- 2. resources into ONE bundle folder ------------------------------------
+# The code locates everything under a single `Resources/` in the bundle
+# (Bundle.url(..., subdirectory: "Resources/...")), so the app's own
+# resources are merged into the same folder the engine data is staged into —
+# two folder references would both copy as "Resources" and collide.
+echo "==> staging resources"
+app_resources="$root/modern_UI/Spektrafilm/Spektrafilm/Resources"
+rsync -a "$app_resources/" "$here/Resources/"
 rsync -a --delete "$engine/resources/" "$here/Resources/engine/"
 if [[ -d "$engine/resources_product/profiles" ]]; then
   cp "$engine/resources_product/profiles/"*.json "$here/Resources/engine/profiles/"
