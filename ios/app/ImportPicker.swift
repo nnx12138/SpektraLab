@@ -116,15 +116,19 @@ struct PhotoLibraryPicker: UIViewControllerRepresentable {
                                  directory: URL) async -> URL? {
             for type in [UTType.heic, UTType.jpeg, UTType.png, UTType.tiff, UTType.image] {
                 if provider.hasItemConformingToTypeIdentifier(type.identifier) {
-                    guard let data = try? await provider.loadDataRepresentation(
-                        forTypeIdentifier: type.identifier) else { continue }
+                    let data: Data? = await withCheckedContinuation { cont in
+                        provider.loadDataRepresentation(forTypeIdentifier: type.identifier) { d, _ in
+                            cont.resume(returning: d)
+                        }
+                    }
+                    guard let data else { continue }
                     let stem = provider.suggestedName.map {
                         $0.replacingOccurrences(of: "/", with: "_")
                     } ?? "IMG_\(String(format: "%04d", index + 1))"
                     let url = directory.appending(path: stem)
                         .appendingPathExtension(type.preferredFilenameExtension ?? "img")
                     do {
-                        try data.write(to: url, options: .atomic)
+                        try data.write(to: url, options: Data.WritingOptions.atomic)
                         return url
                     } catch { continue }
                 }

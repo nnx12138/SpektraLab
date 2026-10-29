@@ -189,10 +189,11 @@ final class CanvasUIView: MTKView, MTKViewDelegate {
         guard let renderer, let host, host.tool != .crop else { return }
         guard g.state == .changed else { return }
         let p = g.location(in: self)
-        if host.placementZoomed(by: Double(g.magnification), at: unclampedNormalised(atView: p)) {
+        let m = g.scale
+        if host.placementZoomed(by: Double(m), at: unclampedNormalised(atView: p)) {
             return
         }
-        renderer.viewport.zoom(by: g.magnification, about: p)
+        renderer.viewport.zoom(by: m, about: p)
         host.viewportChanged()
         scheduleDraw()
     }

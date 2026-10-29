@@ -3498,7 +3498,12 @@ final class Session: CanvasHost {
 
     /// Read one pixel of an rgba16Unorm texture (shared storage).
     nonisolated static func sample(_ tex: MTLTexture, at n: CGPoint) -> SIMD3<Float>? {
-        guard tex.storageMode == .shared || tex.storageMode == .managed else { return nil }
+        #if os(macOS)
+        let readable = tex.storageMode == .shared || tex.storageMode == .managed
+        #else
+        let readable = tex.storageMode == .shared
+        #endif
+        guard readable else { return nil }
         let x = Int(n.x * CGFloat(tex.width - 1)), y = Int(n.y * CGFloat(tex.height - 1))
         var px = [UInt16](repeating: 0, count: 4)
         tex.getBytes(&px, bytesPerRow: 8, from: MTLRegionMake2D(x, y, 1, 1), mipmapLevel: 0)

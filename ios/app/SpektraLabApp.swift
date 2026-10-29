@@ -9,12 +9,11 @@
 import SwiftUI
 
 @main
-enum SpektraLabEntry {
-    @MainActor static let session = Session()
-}
-
 struct SpektraLabApp: App {
-    private var session: Session { SpektraLabEntry.session }
+    /// One Session for the app's lifetime — same decision as the Mac.
+    @MainActor static let session = Session()
+
+    private var session: Session { Self.session }
 
     var body: some Scene {
         WindowGroup {

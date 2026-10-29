@@ -1,6 +1,7 @@
 //  ThumbnailCache.swift — filmstrip thumbnails from ImageIO's embedded
 //  preview, never from the engine, generated off the main actor.
 
+import Foundation
 import ImageIO
 
 private struct ThumbnailKey: Hashable, Sendable {

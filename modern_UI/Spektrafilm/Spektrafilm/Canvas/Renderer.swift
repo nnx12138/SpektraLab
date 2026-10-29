@@ -846,7 +846,13 @@ final class Renderer: NSObject {
         // drawn from — both are the working space, so the split compares two
         // renderings and not two colour spaces.
         let before = original ?? shown
-        let bs = Float(view.window?.backingScaleFactor ?? viewport.backingScale)
+        let windowScale: CGFloat
+        #if os(macOS)
+        windowScale = view.window?.backingScaleFactor ?? -1
+        #else
+        windowScale = view.window?.screen.scale ?? -1
+        #endif
+        let bs = Float(windowScale == -1 ? viewport.backingScale : windowScale)
         var u = canvasUniforms(shown: shown, viewportSize: view.drawableSize, backingScale: CGFloat(bs))
         // The timestamp is not decoration: "the canvas twitches" is a question
         // about *when* frames reach the screen, and a log of states without
@@ -860,7 +866,7 @@ final class Renderer: NSObject {
                    view.drawableSize.width, view.drawableSize.height,
                    view.bounds.width, view.bounds.height,
                    viewport.viewport.width, viewport.viewport.height,
-                   view.window?.backingScaleFactor ?? -1))
+                   windowScale))
         rpd.colorAttachments[0].loadAction = .clear
         rpd.colorAttachments[0].clearColor = MTLClearColor(red: Double(u.surroundGray), green: Double(u.surroundGray), blue: Double(u.surroundGray), alpha: 1)
         guard let enc = cb.makeRenderCommandEncoder(descriptor: rpd) else { return }
