@@ -5197,10 +5197,15 @@ extension Session {
         // print of its own to grade).
         let filmGrade = sidecar.adjustments
         guard let graded = renderer.applyAdjustments(filmGrade, to: base) else { return nil }
+        // Swift 6 treats an async method's arguments as `sending`, which the
+        // nested MainActor function below cannot capture. The texture is only
+        // ever touched on the main actor here, so rebind it to a checked-off
+        // local and hand the layers that binding instead.
+        nonisolated(unsafe) let baseTex = base
         func layer(_ side: HalfFramePair.Side) -> MTLTexture? {
             let own = p[side]?.adjustments
             guard prints[side] != nil || (own != nil && own != filmGrade) else { return nil }
-            return renderer.applyAdjustments(own ?? filmGrade, to: prints[side] ?? base)
+            return renderer.applyAdjustments(own ?? filmGrade, to: prints[side] ?? baseTex)
         }
         return renderer.compositePair(base: graded, first: layer(.left), firstRect: ra,
                                       second: layer(.right), secondRect: rb)
