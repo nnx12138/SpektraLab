@@ -38,6 +38,11 @@ settings:
     CLANG_CXX_LIBRARY: libc++
     SWIFT_OBJC_BRIDGING_HEADER: ../modern_UI/Spektrafilm/Spektrafilm/Service/Spektrafilm-Bridging-Header.h
     HEADER_SEARCH_PATHS: "$(SRCROOT)/../engine/include $(SRCROOT)/../engine/src $(SRCROOT)/../engine/src/core $(SRCROOT)/../engine/third_party/metal-cpp"
+    # The engine's extern "C" API returns Params/Json by value. That is the
+    # Itanium ABI on the Mac and compiles silently; iOS arm64 flags it as a
+    # C-linkage return of a user-defined type. One platform consumes these
+    # functions, so the ABI concern does not apply — silence the warning.
+    OTHER_CFLAGS: -Wno-return-type-c-linkage
     MTL_FAST_MATH: YES            # canvas shader only; the engine metallib is prebuilt safe
     GENERATE_INFOPLIST_FILE: NO
     CODE_SIGN_STYLE: Automatic
