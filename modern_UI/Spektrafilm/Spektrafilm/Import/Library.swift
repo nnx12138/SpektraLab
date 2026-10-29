@@ -1,7 +1,9 @@
 //  Library.swift — the folder is the session. One file or one folder (no
 //  subfolders), listed and sorted once.
 
+#if os(macOS)
 import AppKit
+#endif
 import UniformTypeIdentifiers
 
 enum Library {
@@ -22,6 +24,7 @@ enum Library {
 
     @MainActor
     static func chooseFilesOrFolder() -> [URL] {
+        #if os(macOS)
         let panel = NSOpenPanel()
         panel.canChooseFiles = true
         panel.canChooseDirectories = true
@@ -29,6 +32,12 @@ enum Library {
         panel.message = "Open a folder of negatives, or one or more image files."
         panel.allowedContentTypes = [.folder, .image, .rawImage, .tiff, .png, .jpeg, .heic]
         return panel.runModal() == .OK ? panel.urls : []
+        #else
+        // iOS imports through SwiftUI's `fileImporter` / PhotosUI at the UI
+        // layer, which calls `Session.open(urls:)` with the picked URLs; there
+        // is no modal panel to run here.
+        return []
+        #endif
     }
 
     /// Expand a drop / open selection into frames: folders list, files pass.

@@ -186,7 +186,17 @@ struct ScrubSlider: View {
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { g in
+                        // Modifiers are a pointer affordance (⌥ fine, ⇧ snap);
+                        // a touch drag has none, so iOS scrubs at full
+                        // sensitivity with no snapping.
+                        #if os(macOS)
                         let mods = NSEvent.modifierFlags
+                        let fine = mods.contains(.option)
+                        let snapping = mods.contains(.shift)
+                        #else
+                        let fine = false
+                        let snapping = false
+                        #endif
                         let span = range.upperBound - range.lowerBound
                         if dragStart == nil {
                             dragStart = value
@@ -195,9 +205,9 @@ struct ScrubSlider: View {
                             let target = range.lowerBound + Double(f) * span
                             if abs(target - value) > span * 0.03 { dragStart = target }
                         }
-                        let sens: Double = mods.contains(.option) ? 0.25 : 1
+                        let sens: Double = fine ? 0.25 : 1
                         var v = (dragStart ?? value) + Double(g.translation.width / max(w - knobW, 1)) * span * sens
-                        if mods.contains(.shift) { v = (v / snap).rounded() * snap }
+                        if snapping { v = (v / snap).rounded() * snap }
                         value = v.clamped(to: range)
                     }
                     .onEnded { _ in dragStart = nil; onCommit() }

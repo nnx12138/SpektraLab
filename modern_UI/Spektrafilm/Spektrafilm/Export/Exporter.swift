@@ -19,7 +19,9 @@
 //  a DI is `<stem>_DI.tif`, so it can share a folder with a finished TIFF
 //  (`ExportRecipe.destinationPath`).
 
+#if os(macOS)
 import AppKit
+#endif
 import Foundation
 import ImageIO
 import Metal

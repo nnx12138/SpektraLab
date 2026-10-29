@@ -22,7 +22,9 @@
 //  frame will cost, measured against what is free, with a warning the user can
 //  override rather than a render that silently starts swapping.
 
+#if os(macOS)
 import AppKit
+#endif
 import Foundation
 import Metal
 import Observation
@@ -629,8 +631,13 @@ final class Diagnostics {
     }
 
     func revealLogsInFinder() {
+        #if os(macOS)
         let target = log.sessionFile ?? logDirectory
         NSWorkspace.shared.activateFileViewerSelecting([target])
+        #endif
+        // iOS has no file-reveal affordance; the diagnostics page reads the
+        // log in place, and the bundle reaches the user through the share
+        // sheet in the iOS diagnostics UI.
     }
 
     /// Save the diagnostic bundle (§7). Off the main actor: it reads up to five

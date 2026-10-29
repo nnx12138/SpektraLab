@@ -8,7 +8,11 @@
 //  comment before replacing it with `needsDisplay` — that is the version that
 //  shipped a blank canvas.
 
+#if os(macOS)
 import AppKit
+#else
+import UIKit
+#endif
 import MetalKit
 import SwiftUI
 
@@ -46,7 +50,9 @@ protocol CanvasHost: AnyObject {
     var maskHandles: [MaskHandle] { get }
     func maskHandleDragged(_ handle: MaskHandle, to normalised: CGPoint)
     func toggledOriginal(_ on: Bool)
+#if os(macOS)
     func contextMenu() -> NSMenu?
+#endif
     func hovered(normalised: CGPoint?)
     func stepFrame(_ delta: Int)
     // Picking and placing on the canvas (defaults below: neither).
@@ -73,6 +79,11 @@ extension CanvasHost {
     func placementZoomed(by factor: Double, at normalised: CGPoint) -> Bool { false }
     func endPlacement() -> Bool { false }
 }
+
+// The NSView canvas, its gestures and keys: macOS only. iOS draws the same
+// `Renderer` through `CanvasUIView` in the iOS target's own file, which
+// implements this same `CanvasHost` protocol with UIKit gestures.
+#if os(macOS)
 
 /// The view is its own `MTKViewDelegate`. A separate coordinator object has
 /// to be owned by something — `MTKView.delegate` is weak — and getting that
@@ -794,3 +805,5 @@ struct MetalCanvasView: NSViewRepresentable {
         view.scheduleDraw()
     }
 }
+
+#endif // os(macOS)

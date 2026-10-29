@@ -104,11 +104,14 @@ struct PanelResizeHandle: View {
             .onContinuousHover { phase in
                 // The cursor is pushed and popped rather than set, so leaving
                 // the strip restores whatever the canvas had — the hand tool's
-                // cursor is the one that notices.
+                // cursor is the one that notices. iOS: no cursor, and hover
+                // only exists on pointer devices — nothing to do there.
+                #if os(macOS)
                 switch phase {
                 case .active: NSCursor.resizeLeftRight.set()
                 case .ended: NSCursor.arrow.set()
                 }
+                #endif
             }
             .gesture(
                 DragGesture(minimumDistance: 1)

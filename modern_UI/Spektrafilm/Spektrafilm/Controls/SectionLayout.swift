@@ -102,10 +102,12 @@ struct SectionDivider: View {
                     .contentShape(Rectangle())
                     .onHover { hovering = $0 }
                     .onContinuousHover { phase in
+                        #if os(macOS)
                         switch phase {
                         case .active: NSCursor.resizeUpDown.set()
                         case .ended: NSCursor.arrow.set()
                         }
+                        #endif
                     }
                     .gesture(
                         DragGesture(minimumDistance: 1, coordinateSpace: .global)

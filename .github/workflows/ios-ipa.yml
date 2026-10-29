@@ -1,0 +1,45 @@
+# The iOS port: an unsigned .ipa, built in the cloud.
+#
+# The Mac build cannot run on Windows, and the user verifying on a phone may
+# not have a Mac at all — so CI is the build machine. This job produces an
+# **unsigned** Release .ipa; the signature is applied on the user's own PC by
+# Sideloadly or AltStore with their Apple ID (free accounts: 7-day validity,
+# up to 3 sideloaded apps).
+#
+# Run it from the Actions tab ("iOS ipa (unsigned)") after pushing. First run
+# may fail on Swift/Xcode version drift between the port and the runner's
+# newest Xcode — the log names the file and line.
+
+name: iOS ipa (unsigned)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ipa:
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select the newest Xcode
+        run: |
+          ls -d /Applications/Xcode*.app | sort -V
+          latest=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
+          echo "Selecting $latest"
+          sudo xcode-select -s "$latest"
+          xcodebuild -version
+          xcrun metal --version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Build the unsigned IPA
+        run: ios/build.sh ipa
+
+      - name: Upload the IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: SpektraLab-unsigned-ipa
+          path: ios/build/SpektraLab-unsigned.ipa
+          if-no-files-found: error

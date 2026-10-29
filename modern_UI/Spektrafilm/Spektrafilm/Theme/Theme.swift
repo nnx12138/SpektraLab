@@ -67,7 +67,11 @@
 //  The derivation of every number, and the drawing coordinate it came from,
 //  is `modern_UI/design/TOKENS-main-2026-09-17.md`.
 
+#if os(macOS)
 import AppKit
+#else
+import UIKit
+#endif
 import Observation
 import SwiftUI
 
@@ -1027,14 +1031,31 @@ enum Theme {
     /// holds the string rather than rounding it into an ellipsis.
     /// The height one line of the system face takes at `size` (before the
     /// interface scale): ascender to descender, rounded up.
-    @MainActor static func lineHeight(size: CGFloat, weight: NSFont.Weight = .bold) -> CGFloat {
+    /// The platform system font's weight type: `NSFont.Weight` on the Mac,
+    /// `UIFont.Weight` on iOS — same cases, one alias for the tokens.
+    #if os(macOS)
+    typealias SystemFontWeight = NSFont.Weight
+    #else
+    typealias SystemFontWeight = UIFont.Weight
+    #endif
+
+    @MainActor static func lineHeight(size: CGFloat, weight: SystemFontWeight = .bold) -> CGFloat {
+        #if os(macOS)
         let font = NSFont.systemFont(ofSize: size * InterfaceScaleStore.shared.scale.factor, weight: weight)
         return ceil(font.ascender - font.descender)
+        #else
+        let font = UIFont.systemFont(ofSize: size * InterfaceScaleStore.shared.scale.factor, weight: weight)
+        return ceil(font.ascender - font.descender)
+        #endif
     }
 
     @MainActor static func textWidth(_ text: String, size: CGFloat,
-                                     weight: NSFont.Weight = .bold) -> CGFloat {
+                                     weight: SystemFontWeight = .bold) -> CGFloat {
+        #if os(macOS)
         let font = NSFont.systemFont(ofSize: size * InterfaceScaleStore.shared.scale.factor, weight: weight)
+        #else
+        let font = UIFont.systemFont(ofSize: size * InterfaceScaleStore.shared.scale.factor, weight: weight)
+        #endif
         return ceil((text as NSString).size(withAttributes: [.font: font]).width)
     }
 

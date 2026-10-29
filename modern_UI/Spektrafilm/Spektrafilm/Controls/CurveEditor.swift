@@ -9,7 +9,9 @@
 //  question — `Curve.index(near:in:)` — so a point you can grab is a point you
 //  can right-click.
 
+#if os(macOS)
 import AppKit
+#endif
 import SwiftUI
 
 struct CurveEditor: View {
@@ -162,6 +164,7 @@ struct CurveEditor: View {
     /// the gesture it is meant to sit beside.
     ///
     /// So this is an `NSView` that answers hit tests **only for a context
+#if os(macOS)
     /// click** — right button, or control-click, which is the same gesture on a
     /// trackpad — and lets every other event through to the SwiftUI view
     /// underneath. Its `rightMouseDown` pops up an ordinary `NSMenu` at the
@@ -243,6 +246,18 @@ struct CurveEditor: View {
             }
         }
     }
+#else
+    /// iOS: the NSMenu-based point context menu has no UIKit equivalent wired
+    /// yet — the view is a passthrough, and deleting a curve point arrives
+    /// with the iOS curve UI. The signature matches the macOS one, so the
+    /// call site is shared verbatim.
+    private struct PointContextMenu: View {
+        let size: CGSize
+        let curve: Curve
+        let delete: (Int) -> Void
+        var body: some View { Color.clear.allowsHitTesting(false) }
+    }
+#endif
 
     private var readout: some View {
         HStack(spacing: 16) {

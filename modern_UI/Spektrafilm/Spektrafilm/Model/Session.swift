@@ -22,7 +22,9 @@
 //    an edit settles→  reprint(preview resolution)      →  the full render follows
 //    open(folder)   →  Browse, nothing rendered        →  select() enters Print
 
+#if os(macOS)
 import AppKit
+#endif
 import Foundation
 import Observation
 import SwiftUI
@@ -3402,6 +3404,7 @@ final class Session: CanvasHost {
         guard let n, let base = renderer.base else { hoverValue = nil; return }
         hoverValue = Session.sample(base, at: n)
     }
+#if os(macOS)
     func contextMenu() -> NSMenu? {
         if pair != nil { return pairContextMenu() }
         let m = NSMenu()
@@ -3425,6 +3428,7 @@ final class Session: CanvasHost {
     @objc private func pasteMenu() { pasteSettings() }
     @objc private func resetCrop() { geometry = .default }
     @objc private func exportMenu() { showExport = true }
+#endif
 
     /// What the engine's auto-exposure solved for this frame. The Exp. Comp.
     /// slider is an offset from it, so the UI has to say what the zero means
@@ -4896,6 +4900,7 @@ extension Session {
     }
 
     /// The menu of the hole under the pointer (a right click picks it first).
+#if os(macOS)
     func pairContextMenu() -> NSMenu {
         let m = NSMenu()
         func add(_ title: String, _ action: Selector, enabled: Bool = true) {
@@ -4945,6 +4950,7 @@ extension Session {
     @objc private func pairMenuTurnCamera() { setPairTurned(!(pair?.turned ?? false)) }
     @objc private func pairMenuFit() { zoomToFit() }
     @objc private func pairMenuExport() { showExport = true }
+#endif
 }
 
 // MARK: - a pair's frames, each with its own print and grade

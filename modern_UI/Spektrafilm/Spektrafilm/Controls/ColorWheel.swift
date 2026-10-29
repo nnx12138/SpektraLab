@@ -17,7 +17,11 @@
 //  .swift`), so all of this is arrangement and interaction over the state that
 //  already exists.
 
+#if os(macOS)
 import AppKit
+#else
+import UIKit
+#endif
 import SwiftUI
 
 struct ColorBalanceEditor: View {
@@ -559,14 +563,27 @@ private extension Color {
     /// does: the value is linear in the arc's parameter, so the colour should
     /// be too.
     func interpolate(to other: Color, amount: Double) -> Color {
+        #if os(macOS)
         let a = NSColor(self).usingColorSpace(.sRGB) ?? .gray
         let b = NSColor(other).usingColorSpace(.sRGB) ?? .gray
+        let ar = a.redComponent, ag = a.greenComponent, ab = a.blueComponent, aa = a.alphaComponent
+        let br = b.redComponent, bg = b.greenComponent, bb = b.blueComponent, ba = b.alphaComponent
+        #else
+        let light = UITraitCollection(userInterfaceStyle: .light)
+        func rgba(_ c: Color) -> (CGFloat, CGFloat, CGFloat, CGFloat) {
+            var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+            UIColor(c).resolvedColor(with: light).getRed(&r, green: &g, blue: &b, alpha: &a)
+            return (r, g, b, a)
+        }
+        let (ar, ag, ab, aa) = rgba(self)
+        let (br, bg, bb, ba) = rgba(other)
+        #endif
         let t = CGFloat(amount.clamped(to: 0...1))
         return Color(.sRGB,
-                     red: a.redComponent + (b.redComponent - a.redComponent) * t,
-                     green: a.greenComponent + (b.greenComponent - a.greenComponent) * t,
-                     blue: a.blueComponent + (b.blueComponent - a.blueComponent) * t,
-                     opacity: a.alphaComponent + (b.alphaComponent - a.alphaComponent) * t)
+                     red: ar + (br - ar) * t,
+                     green: ag + (bg - ag) * t,
+                     blue: ab + (bb - ab) * t,
+                     opacity: aa + (ba - aa) * t)
     }
 }
 
